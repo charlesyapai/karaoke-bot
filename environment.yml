@@ -1,0 +1,8 @@
+name: karaoke-bot
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8  # Specify the Python version if needed
+  - python-telegram-bot
+  - pandas
+  - typing_extensions  # If you need the `typing` module, use `typing_extensions` for versions beyond Python 3.5
