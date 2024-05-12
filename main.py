@@ -82,7 +82,4 @@ if __name__ == '__main__':
     print('Polling......')
     app.run_polling(poll_interval = 5, close_loop = False) # Define the interval
     
-    # app.initialize()
-    # app.start()
-    # app.updater.start_polling()
 # %%
