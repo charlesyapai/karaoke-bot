@@ -5,7 +5,6 @@ This is a Telegram bot that I'm making to track songs I'd be singing with friend
 
 
 
-
 ## Installation
 To run this bot, you need to set up a Conda environment with the necessary dependencies.
 
@@ -33,3 +32,8 @@ To run the bot:
 `\path-to-miniconda\miniconda3\envs\karaoke-bot\python.exe main.py`
 
 It is important to point to the correct version of python being used to run the file for some reason. Ensure that you do not run this notebook in an interactive window as well. 
+
+
+# Setting up the bot with @BotFather
+
+Make sure to get the API key from BotFather, and also set the privacy of the bot off to enable messages from groups.

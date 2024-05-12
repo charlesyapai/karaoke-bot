@@ -10,6 +10,7 @@ with open('tokens/telegram_token', 'r') as file: token_content = file.read()
 TOKEN: Final[str] = token_content.strip()
 BOT_USERNAME = '@CodechellaBot'
 
+
 #%% Commands
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello! Thanks for chatting with me! I am CodechellaBot!')
@@ -19,8 +20,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('This is a custom command!')
-
-
 
 #%% Responses
 
@@ -56,9 +55,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print('Bot:', response)
     await update.message.reply_text(response)
 
+
+
+
+
 #%% Logging errors
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error \n {context.error}')
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #%% Final application builder
