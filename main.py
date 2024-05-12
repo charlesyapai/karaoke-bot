@@ -80,17 +80,40 @@ async def load_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 #%% Responses
 def handle_response(text: str) -> str:
+    """
+    Processes incoming text messages and returns quirky and personable responses.
+    This function makes the bot interact in a fun and engaging manner, responding to greetings,
+    checking in on the bot's status, and reacting to mentions of specific names or phrases.
+    """
     processed: str = text.lower()
-    if 'hello' in processed: 
-        return 'Hey there!'
+
+    if 'introduce yourself' in processed:
+        return (
+            "🎤 **Hello, lovely humans and fellow music enthusiasts! I'm CodechellaBot, your personal karaoke party planner!** 🎉\n\n"
+            "As a virtual maestro of melodies, I'm here to help you compile and manage a playlist of your favorite songs to sing along to. "
+            "Whether you're gearing up for a night of karaoke or just want to share some tunes, I'm your bot!\n\n"
+            "Here’s what I can do for you:\n\n"
+            "- Add a Song: Just type `/add [song_name]` to add a new song to our shared playlist. For example, `/add Bohemian Rhapsody`.\n"
+            "- Delete a Song: Type `/delete [song_name]` to remove it from the list.\n"
+            "- View the Playlist: Type `/list` to see the full list along with who added each song.\n\n"
+            "🌟 I'm here to ensure your musical selections are pitch-perfect and everyone gets a chance to shine in the spotlight. So, what are we singing today? 🎶"
+        )
     
+    # Greeting response with a friendly touch
+    if 'hello' in processed:
+        return 'Hey there, sunshine! How can I make your day more melodious? 🎶'
+
+    # Responding to inquiries about the bot's status with a positive spin
     if 'how are you' in processed:
-        return 'I am good!'
-    
+        return "I'm just fantastic! Singing my code out loud. And you? 😄"
+
+    # Fun response when a specific name is mentioned
     if 'charles' in processed:
-        return 'I love Charles!'
-    
-    return 'I do not understand what you wrote...'
+        return "Ah, Charles! He's just awesome 🎷"
+
+    # Adding a humorous touch when the bot does not understand the message
+    return "Oops! I tuned out for a moment there. Could you repeat that in the key of C major? 🎹"
+
 
 #%% Handle how the user can try to contact the bot
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):

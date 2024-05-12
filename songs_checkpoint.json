@@ -1,10 +1,17 @@
 {
-    "Someone like you by adele": {
-        "user": "Charles",
-        "user_id": 127737245
-    },
-    "Fire in the rain by adele": {
-        "user": "Charles",
-        "user_id": 127737245
-    }
+    "Shape of You": {"user": "Charles", "user_id": 127737245},
+    "Perfect": {"user": "Charles", "user_id": 127737245},
+    "Thinking Out Loud": {"user": "Charles", "user_id": 127737245},
+    "Sugar": {"user": "Charles", "user_id": 127737245},
+    "Moves Like Jagger": {"user": "Charles", "user_id": 127737245},
+    "Girls Like You": {"user": "Charles", "user_id": 127737245},
+    "Someone Like You": {"user": "Charles", "user_id": 127737245},
+    "Rolling in the Deep": {"user": "Charles", "user_id": 127737245},
+    "Hello": {"user": "Charles", "user_id": 127737245},
+    "Hall of Fame": {"user": "Charles", "user_id": 127737245},
+    "The Man Who Can't Be Moved": {"user": "Charles", "user_id": 127737245},
+    "Breakeven": {"user": "Charles", "user_id": 127737245},
+    "Don't Stop Believin'": {"user": "Charles", "user_id": 127737245},
+    "Bohemian Rhapsody": {"user": "Charles", "user_id": 127737245},
+    "Living on a Prayer": {"user": "Charles", "user_id": 127737245}
 }
