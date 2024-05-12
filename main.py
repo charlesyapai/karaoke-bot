@@ -6,8 +6,8 @@ from telegram import Update # type: ignore
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
 # -----------
 #%% Read the token in the telegram token and define it as TOKEN, and add bot's username
-with open('tokens/telegram_token', 'r') as file: token_content = file.read()
-TOKEN: Final[str] = token_content.strip()
+# with open('tokens/telegram_token', 'r') as file: token_content = file.read()
+# TOKEN: Final[str] = token_content.strip()
 BOT_USERNAME = '@CodechellaBot'
 
 
