@@ -16,10 +16,56 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Hello! Thanks for chatting with me! I am CodechellaBot!')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('I am a songlist compiler. Please tell me which songs you want to add to the list, or if you\'d like to see the list!')
+    await update.message.reply_text("I am a songlist compiler. Here's how you can interact with me:\n\n"
+        "!add [song_name] - Adds a song to the list. E.g., !add Bohemian Rhapsody\n"
+        "!delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., !delete Bohemian Rhapsody\n"
+        "!list - Displays all songs in the list with the requester's name.\n\n"
+        "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
 
 async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('This is a custom command!')
+
+
+
+#%% Songlist handling
+
+songs = {}
+
+async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if not args:
+        await update.message.reply_text('Please specify a song to add.')
+        return
+    song_name = ' '.join(args).strip()
+    user = update.effective_user
+    if song_name in songs:
+        await update.message.reply_text('This song is already on the list.')
+    else:
+        songs[song_name] = {'user': user.full_name, 'user_id': user.id}
+        await update.message.reply_text(f'Added "{song_name}" to the list.')
+
+async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if not args:
+        await update.message.reply_text('Please specify a song to delete.')
+        return
+    song_name = ' '.join(args).strip()
+    user = update.effective_user
+    if song_name not in songs:
+        await update.message.reply_text('This song is not on the list.')
+    elif songs[song_name]['user_id'] != user.id:
+        await update.message.reply_text('You do not have permission to delete this song.')
+    else:
+        del songs[song_name]
+        await update.message.reply_text(f'Removed "{song_name}" from the list.')
+
+async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not songs:
+        await update.message.reply_text('The song list is empty.')
+        return
+    message = "Song list:\n" + '\n'.join([f"{song} - requested by {info['user']}" for song, info in songs.items()])
+    await update.message.reply_text(message)
+
 
 #%% Responses
 
@@ -56,9 +102,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 
-
-
-
 #%% Logging errors
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error \n {context.error}')
@@ -85,6 +128,15 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('start', start_command)) # Define commands
     app.add_handler(CommandHandler('help', help_command)) 
     app.add_handler(CommandHandler('custom', custom_command))   
+
+
+
+
+    # Handling song commands
+    app.add_handler(CommandHandler('add', add_song_command))
+    app.add_handler(CommandHandler('delete', delete_song_command))
+    app.add_handler(CommandHandler('list', list_songs_command))
+
 
     # Messages
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
