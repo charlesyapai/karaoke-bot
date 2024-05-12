@@ -12,8 +12,6 @@ BOT_USERNAME = '@CodechellaBot'
 
 
 #%% Commands
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('Hello! Thanks for chatting with me! I am CodechellaBot!')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("I am a songlist compiler. Here's how you can interact with me:\n\n"
@@ -22,13 +20,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "!list - Displays all songs in the list with the requester's name.\n\n"
         "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
 
-async def custom_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('This is a custom command!')
-
-
-
 #%% Songlist handling
-
 songs = {}
 
 async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -67,8 +59,26 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(message)
 
 
-#%% Responses
 
+# Saving songlist commands
+
+import json
+
+async def save_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    with open('songs_checkpoint.json', 'w') as f:
+        json.dump(songs, f, indent=4, default=str)  # Using default=str to handle any non-serializable types gracefully
+    await update.message.reply_text('Checkpoint saved successfully!')
+
+async def load_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        with open('songs_checkpoint.json', 'r') as f:
+            global songs
+            songs = json.load(f)
+        await update.message.reply_text('Checkpoint loaded successfully!')
+    except FileNotFoundError:
+        await update.message.reply_text('No checkpoint file found.')
+
+#%% Responses
 def handle_response(text: str) -> str:
     processed: str = text.lower()
     if 'hello' in processed: 
@@ -125,11 +135,11 @@ if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
 
     # Commands
-    app.add_handler(CommandHandler('start', start_command)) # Define commands
     app.add_handler(CommandHandler('help', help_command)) 
-    app.add_handler(CommandHandler('custom', custom_command))   
 
-
+    # Saving commands
+    app.add_handler(CommandHandler('save', save_checkpoint))
+    app.add_handler(CommandHandler('load', load_checkpoint))
 
 
     # Handling song commands
