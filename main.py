@@ -7,12 +7,12 @@ from telegram import Update # type: ignore
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
 # -----------
 #%% Read the token in the telegram token and define it as TOKEN, and add bot's username
-# with open('tokens/telegram_token', 'r') as file: token_content = file.read()
-# TOKEN: Final[str] = token_content.strip()
+with open('tokens/telegram_token', 'r') as file: token_content = file.read()
+TOKEN: Final[str] = token_content.strip()
 BOT_USERNAME = '@CodechellaBot'
 
 # for koyeb, import the environment variable
-TOKEN = os.envrion.get("TOKEN")
+# TOKEN = os.envrion.get("TOKEN")
 
 #%% Commands
 
@@ -183,6 +183,6 @@ if __name__ == '__main__':
     # Check for whether theres a new user message or something we have to respond to: Polling
     # Polls the bot
     print('Polling......')
-    app.run_polling(poll_interval = 5, close_loop = False) # Define the interval
+    app.run_polling(poll_interval = 10, close_loop = False) # Define the interval
     
 # %%
