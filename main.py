@@ -118,8 +118,10 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 # Saving songlist commands
 async def save_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global songs_df
     songs_df.to_csv('songs_checkpoint.csv', index=False)
     await update.message.reply_text('Checkpoint saved successfully!')
+
 
 async def load_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global songs_df
