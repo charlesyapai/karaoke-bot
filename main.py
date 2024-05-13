@@ -126,10 +126,13 @@ async def save_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def load_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global songs_df
     try:
-        songs_df = pd.read_csv('songs_checkpoint.csv')
+        songs_df = pd.read_csv('songs_checkpoint.csv', keep_default_na=False)
+        songs_df['priority_number'] = songs_df['priority_number'].apply(pd.to_numeric, errors='coerce')
+        songs_df[['matched_song_name', 'genre', 'artist']] = songs_df[['matched_song_name', 'genre', 'artist']].where(pd.notna(songs_df), None)
         await update.message.reply_text('Checkpoint loaded successfully!')
     except FileNotFoundError:
         await update.message.reply_text('No checkpoint file found.')
+
 
 
 #%% Responses
