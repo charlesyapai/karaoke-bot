@@ -53,10 +53,15 @@ async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         new_entry = pd.DataFrame({
             'song_name': [song_name],
             'user_full_name': [user.full_name],
-            'user_id': [user.id]
+            'user_id': [user.id],
+            'priority_number': [np.nan],  # Initialize as NaN
+            'matched_song_name': [pd.NA],  # Initialize as NA
+            'genre': [pd.NA],  # Initialize as NA
+            'artist': [pd.NA]  # Initialize as NA
         })
-        songs_df = pd.concat([songs_df, new_entry], ignore_index=True)  # Use concat instead of append
+        songs_df = pd.concat([songs_df, new_entry], ignore_index=True)
         await update.message.reply_text(f'Added "{song_name}" to the list.')
+
 
 
 
