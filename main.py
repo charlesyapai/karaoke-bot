@@ -1,6 +1,7 @@
 #%% [markdown]
 # This is the main.py file that I will be using to host most of the main functions of the telegram bot
 #%% Import statements
+import os
 from typing import Final # Import to give the constants a type
 from telegram import Update # type: ignore
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
@@ -10,6 +11,8 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 # TOKEN: Final[str] = token_content.strip()
 BOT_USERNAME = '@CodechellaBot'
 
+# for koyeb, import the environment variable
+TOKEN = os.envrion.get("TOKEN")
 
 #%% Commands
 
