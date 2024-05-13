@@ -110,9 +110,16 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
     message = ""
     for name, group in songs_df.groupby('user_full_name'):
-        song_list = '\n'.join(group['song_name'])
-        message += f"🎶{name}🎶:\n──────────────\n\n{song_list}\n\n"
+        song_list = '\n'.join([
+            f"{row['song_name']} - {row['matched_song_name'] if pd.notna(row['matched_song_name']) else '-'}, "
+            f"{row['artist'] if pd.notna(row['artist']) else '-'} "
+            f"{row['genre'] if pd.notna(row['genre']) else '-'} "
+            f"{row['priority_number'] if pd.notna(row['priority_number']) else '-'}"
+            for _, row in group.iterrows()
+        ])
+        message += f"🎶 {name} 🎶:\n──────────────\n{song_list}\n\n"
     await update.message.reply_text(message)
+
 
 
 
