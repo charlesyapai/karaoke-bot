@@ -2,6 +2,8 @@
 # This is the main.py file that I will be using to host most of the main functions of the telegram bot
 #%% Import statements
 import os
+import pandas as pd
+import numpy as np
 from typing import Final # Import to give the constants a type
 from telegram import Update # type: ignore
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
@@ -24,7 +26,18 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
 
 #%% Songlist handling
-songs = {}
+
+songs_df = pd.DataFrame(columns=[
+    'song_name', 'user_full_name', 'user_id', 
+    'priority_number', 'matched_song_name', 'genre', 'artist'
+])
+
+# Initialize these columns with a default of NaN for now
+songs_df['priority_number'] = np.nan
+songs_df['matched_song_name'] = pd.NA
+songs_df['genre'] = pd.NA
+songs_df['artist'] = pd.NA
+
 
 async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
@@ -33,11 +46,19 @@ async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     song_name = ' '.join(args).strip()
     user = update.effective_user
-    if song_name in songs:
+    global songs_df  # Declare global before modifying it
+    if song_name in songs_df['song_name'].values:
         await update.message.reply_text('This song is already on the list.')
     else:
-        songs[song_name] = {'user': user.full_name, 'user_id': user.id}
+        new_entry = pd.DataFrame({
+            'song_name': [song_name],
+            'user_full_name': [user.full_name],
+            'user_id': [user.id]
+        })
+        songs_df = pd.concat([songs_df, new_entry], ignore_index=True)  # Use concat instead of append
         await update.message.reply_text(f'Added "{song_name}" to the list.')
+
+
 
 async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
@@ -46,40 +67,63 @@ async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
     song_name = ' '.join(args).strip()
     user = update.effective_user
-    if song_name not in songs:
+    global songs_df
+    if song_name not in songs_df['song_name'].values:
         await update.message.reply_text('This song is not on the list.')
-    elif songs[song_name]['user_id'] != user.id:
-        await update.message.reply_text('You do not have permission to delete this song.')
-    else:
-        del songs[song_name]
+    elif not songs_df[(songs_df['song_name'] == song_name) & (songs_df['user_id'] == user.id)].empty:
+        songs_df = songs_df.drop(songs_df[(songs_df['song_name'] == song_name) & (songs_df['user_id'] == user.id)].index)
         await update.message.reply_text(f'Removed "{song_name}" from the list.')
+    else:
+        await update.message.reply_text('You do not have permission to delete this song.')
+
+
+
+
+
+# List songs
+async def individual_list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    global songs_df
+    # Filter the DataFrame to get only the songs added by the requesting user
+    user_songs_df = songs_df[songs_df['user_id'] == user.id]
+
+    if user_songs_df.empty:
+        await update.message.reply_text('You have not added any songs to the list.')
+    else:
+        num_songs = len(user_songs_df)
+        message = f"🎶 {user.full_name}, you've added {num_songs} song(s):\n"
+        message += "───────────────\n"  # Dotted line for separation
+        # Create a numbered list of songs
+        songs_list = '\n'.join(f"{idx + 1}. {song}" for idx, song in enumerate(user_songs_df['song_name']))
+        message += songs_list
+        await update.message.reply_text(message)
+
 
 async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not songs:
+    if songs_df.empty:
         await update.message.reply_text('The song list is empty.')
         return
-    message = "Song list:\n" + '\n'.join([f"{song} - requested by {info['user']}" for song, info in songs.items()])
+    message = ""
+    for name, group in songs_df.groupby('user_full_name'):
+        song_list = '\n'.join(group['song_name'])
+        message += f"🎶{name}🎶:\n──────────────\n\n{song_list}\n\n"
     await update.message.reply_text(message)
 
 
 
 # Saving songlist commands
-
-import json
-
 async def save_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    with open('songs_checkpoint.json', 'w') as f:
-        json.dump(songs, f, indent=4, default=str)  # Using default=str to handle any non-serializable types gracefully
+    songs_df.to_csv('songs_checkpoint.csv', index=False)
     await update.message.reply_text('Checkpoint saved successfully!')
 
 async def load_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global songs_df
     try:
-        with open('songs_checkpoint.json', 'r') as f:
-            global songs
-            songs = json.load(f)
+        songs_df = pd.read_csv('songs_checkpoint.csv')
         await update.message.reply_text('Checkpoint loaded successfully!')
     except FileNotFoundError:
         await update.message.reply_text('No checkpoint file found.')
+
 
 #%% Responses
 def handle_response(text: str) -> str:
@@ -149,12 +193,6 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-
-
-
-
-
-
 #%% Final application builder
 if __name__ == '__main__':
     print('Starting bot...')
@@ -171,7 +209,11 @@ if __name__ == '__main__':
     # Handling song commands
     app.add_handler(CommandHandler('add', add_song_command))
     app.add_handler(CommandHandler('delete', delete_song_command))
-    app.add_handler(CommandHandler('list', list_songs_command))
+
+
+    # Listing songs
+    app.add_handler(CommandHandler('list', individual_list_command))
+    app.add_handler(CommandHandler('listall', list_songs_command))
 
 
     # Messages
@@ -183,6 +225,6 @@ if __name__ == '__main__':
     # Check for whether theres a new user message or something we have to respond to: Polling
     # Polls the bot
     print('Polling......')
-    app.run_polling(poll_interval = 10, close_loop = False) # Define the interval
+    app.run_polling(poll_interval = 3, close_loop = False) # Define the interval
     
 # %%
