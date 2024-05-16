@@ -7,6 +7,8 @@ import numpy as np
 from typing import Final # Import to give the constants a type
 from telegram import Update # type: ignore
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
+from match_songs import match_song
+
 # -----------
 #%% Read the token in the telegram token and define it as TOKEN, and add bot's username
 with open('tokens/telegram_token', 'r') as file: token_content = file.read()
@@ -42,25 +44,41 @@ songs_df['artist'] = pd.NA
 async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
-        await update.message.reply_text('Please specify a song to add.')
+        await update.message.reply_text('Please specify a song to add. Format: "/add song name - artist name"')
         return
-    song_name = ' '.join(args).strip()
+
+    # Join arguments and check if there's an artist specified
+    input_text = ' '.join(args).strip()
+    if '-' in input_text:
+        song_name, artist_name = input_text.split('-', 1)
+        song_name = song_name.strip()
+        artist_name = artist_name.strip()
+    else:
+        song_name = input_text
+        artist_name = None
+
+    # Use match_song to find the best match
+    matched_song_name, matched_artist = match_song(song_name, artist_name)
+    
+    # Query for genres (additional function or API call needed here)
+    genre = "Unknown"  # Placeholder until genre functionality is implemented
+
     user = update.effective_user
-    global songs_df  # Declare global before modifying it
-    if song_name in songs_df['song_name'].values:
-        await update.message.reply_text('This song is already on the list.')
+    global songs_df
+    if matched_song_name in songs_df['song_name'].values:
+        await update.message.reply_text(f'This song ({matched_song_name} by {matched_artist}) is already on the list.')
     else:
         new_entry = pd.DataFrame({
             'song_name': [song_name],
             'user_full_name': [user.full_name],
             'user_id': [user.id],
-            'priority_number': [np.nan],  # Initialize as NaN
-            'matched_song_name': [pd.NA],  # Initialize as NA
-            'genre': [pd.NA],  # Initialize as NA
-            'artist': [pd.NA]  # Initialize as NA
+            'matched_song_name': [matched_song_name],
+            'artist': [matched_artist],
+            'genre': [genre],  # Assuming genre will be added in the future
+            'priority_number': [np.nan]
         })
         songs_df = pd.concat([songs_df, new_entry], ignore_index=True)
-        await update.message.reply_text(f'Added "{song_name}" to the list.')
+        await update.message.reply_text(f'Added "{matched_song_name}" by {matched_artist} to the list.')
 
 
 
@@ -111,10 +129,9 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     message = ""
     for name, group in songs_df.groupby('user_full_name'):
         song_list = '\n'.join([
-            f"{row['song_name']} - {row['matched_song_name'] if pd.notna(row['matched_song_name']) else '-'}, "
-            f"{row['artist'] if pd.notna(row['artist']) else '-'} "
-            f"{row['genre'] if pd.notna(row['genre']) else '-'} "
-            f"{row['priority_number'] if pd.notna(row['priority_number']) else '-'}"
+            f"{row['song_name']}, by"
+            f"{row['artist'] if pd.notna(row['artist']) else ''} "
+            f"{row['priority_number'] if pd.notna(row['priority_number']) else ''}"
             for _, row in group.iterrows()
         ])
         message += f"🎶 {name} 🎶:\n──────────────\n{song_list}\n\n"
