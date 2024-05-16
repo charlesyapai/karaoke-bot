@@ -8,6 +8,7 @@ from typing import Final # Import to give the constants a type
 from telegram import Update # type: ignore
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
 from match_songs import match_song
+import functools # For logging commands
 
 # -----------
 #%% Read the token in the telegram token and define it as TOKEN, and add bot's username
@@ -41,6 +42,17 @@ songs_df['genre'] = pd.NA
 songs_df['artist'] = pd.NA
 
 
+
+def log_command(func):
+    @functools.wraps(func)
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user = update.effective_user
+        command = update.message.text
+        print(f"Command: {command} by User: {user.full_name} ({user.id})")  # Logging the command and user info
+        await func(update, context)
+    return wrapper
+
+@log_command
 async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
@@ -82,7 +94,7 @@ async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-
+@log_command
 async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
@@ -104,12 +116,14 @@ async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 # List songs
+@log_command
 async def individual_list_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     global songs_df
+    # Convert user ID to string for comparison
+    user_id_str = str(user.id)
     # Filter the DataFrame to get only the songs added by the requesting user
-    user_songs_df = songs_df[songs_df['user_id'] == user.id]
-
+    user_songs_df = songs_df[songs_df['user_id'] == user_id_str]
     if user_songs_df.empty:
         await update.message.reply_text('You have not added any songs to the list.')
     else:
@@ -122,6 +136,7 @@ async def individual_list_command(update: Update, context: ContextTypes.DEFAULT_
         await update.message.reply_text(message)
 
 
+@log_command
 async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if songs_df.empty:
         await update.message.reply_text('The song list is empty.')
@@ -129,7 +144,7 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     message = ""
     for name, group in songs_df.groupby('user_full_name'):
         song_list = '\n'.join([
-            f"{row['song_name']}, by"
+            f"{row['song_name']}, by "
             f"{row['artist'] if pd.notna(row['artist']) else ''} "
             f"{row['priority_number'] if pd.notna(row['priority_number']) else ''}"
             for _, row in group.iterrows()
@@ -141,6 +156,7 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 # Saving songlist commands
+@log_command
 async def save_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global songs_df
     songs_df.to_csv('songs_checkpoint.csv', index=False)
@@ -152,10 +168,58 @@ async def load_checkpoint(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         songs_df = pd.read_csv('songs_checkpoint.csv', keep_default_na=False)
         songs_df['priority_number'] = songs_df['priority_number'].apply(pd.to_numeric, errors='coerce')
-        songs_df[['matched_song_name', 'genre', 'artist']] = songs_df[['matched_song_name', 'genre', 'artist']].where(pd.notna(songs_df), None)
+        songs_df[['matched_song_name', 'genre', 'artist']] = songs_df[['matched_song_name', 'genre', 'artist']].replace({pd.NA: None})
+        songs_df['user_id'] = songs_df['user_id'].astype(str)  # Convert user_id to string for consistent data handling
         await update.message.reply_text('Checkpoint loaded successfully!')
     except FileNotFoundError:
         await update.message.reply_text('No checkpoint file found.')
+
+
+
+
+### Advanced Listing Commands
+@log_command
+async def list_by_singers_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global songs_df
+    if songs_df.empty:
+        await update.message.reply_text('The song list is currently empty.')
+        return
+    
+    message = "🎤 Songs by Singer:\n───────────────\n"
+    for artist, group in songs_df.groupby('artist'):
+        num_songs = len(group)
+        song_list = '\n'.join(f"{idx + 1}. {row['matched_song_name']}" for idx, row in group.iterrows())
+        message += f"🎶 {artist if pd.notna(artist) else 'Unknown'} ({num_songs} songs):\n{song_list}\n\n"
+    
+    await update.message.reply_text(message)
+
+@log_command
+async def get_stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    global songs_df
+    # Convert user ID to string for comparison
+    user_id_str = str(user.id)
+    # Filter the DataFrame to get only the songs added by the requesting user
+    user_songs_df = songs_df[songs_df['user_id'] == user_id_str]
+
+    if user_songs_df.empty:
+        await update.message.reply_text("You haven't added any songs to the list yet.")
+        return
+    
+    total_songs = len(user_songs_df)
+    songs_by_artist = user_songs_df['artist'].value_counts().to_dict()
+    songs_by_genre = user_songs_df['genre'].value_counts().to_dict()
+
+    message = f"🎵 Stats for {user.full_name}:\n"
+    message += f"Total songs requested: {total_songs}\n"
+    message += "Songs by artist:\n"
+    for artist, count in songs_by_artist.items():
+        message += f"- {artist if artist else 'Unknown'}: {count}\n"
+    message += "Songs by genre:\n"
+    for genre, count in songs_by_genre.items():
+        message += f"- {genre if genre else 'Unknown'}: {count}\n"
+
+    await update.message.reply_text(message)
 
 
 
@@ -200,7 +264,6 @@ def handle_response(text: str) -> str:
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_type: str = update.message.chat.type # This will inform us if it's a group or private chat
     text: str = update.message.text # The incoming processable message
-
     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"') # Get the user ID  and message type
 
     if message_type == 'group': # Bot to respond only when we call its username
@@ -249,6 +312,9 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('list', individual_list_command))
     app.add_handler(CommandHandler('listall', list_songs_command))
 
+    # Listing by singers and stats
+    app.add_handler(CommandHandler('listbysingers', list_by_singers_command))
+    app.add_handler(CommandHandler('getstats', get_stats_command))
 
     # Messages
     app.add_handler(MessageHandler(filters.TEXT, handle_message))
