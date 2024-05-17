@@ -27,19 +27,19 @@ BOT_USERNAME = '@CodechellaBot'
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("I am a songlist compiler! Here's how you can interact with me:\n\n"
-        "/add [song_name] - Artist - Adds a song to the list. E.g., /add Bohemian Rhapsody - Queen \n"
-        "/delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., /delete Bohemian Rhapsody\n"
-        "/list - Displays all songs in the list with the requester's name.\n\n"
-        "/listall - Displays all the songs in the list."
-        "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
+        "/add  - Artist - Adds a song to the list. E.g., /add Bohemian Rhapsody - Queen \n"
+        "/delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., /delete Bohemian Rhapsody\n\n"
+        "===----Pressable Buttons----===\n\n/list - Displays all songs in the list with the requester's name.\n\n"
+        "/listall - Displays all the songs in the list.\n\n"
+        "/queue - Interact with the queue. You can't add songs to the queue if you haven't added it to your list!")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("I am a songlist compiler. Here's how you can interact with me:\n\n"
-        "/add [song_name] - Artist - Adds a song to the list. E.g., /add Bohemian Rhapsody - Queen \n"
-        "/delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., /delete Bohemian Rhapsody\n"
-        "/list - Displays all songs in the list for the specific requester.\n\n"
-        "/listall - Displays all the songs in the list."
-        "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
+        "/add  - Artist - Adds a song to the list. E.g., /add Bohemian Rhapsody - Queen \n"
+        "/delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., /delete Bohemian Rhapsody\n\n"
+        "===----Pressable Buttons----===\n\n/list - Displays all songs in the list with the requester's name.\n\n"
+        "/listall - Displays all the songs in the list.\n\n"
+        "/queue - Interact with the queue. You can't add songs to the queue if you haven't added it to your list!")
 
 #%% Songlist handling
 
@@ -123,8 +123,8 @@ async def add_to_queue_command(update: Update, context: ContextTypes.DEFAULT_TYP
     user_id_str = str(user.id)
     print("Checking queue length...")  # Debug log
     # Check if the queue is full
-    if len(song_queue) >= 10:
-        await update.message.reply_text("The song queue is full (10 songs max).")
+    if len(song_queue) >= 15:
+        await update.message.reply_text("The song queue is full (15 songs max).")
         return
 
     print(f"Fetching songs added by user {user.id}...")  # Debug log
