@@ -8,3 +8,4 @@ dependencies:
   - typing_extensions  # If you need the `typing` module, use `typing_extensions` for versions beyond Python 3.5
   - functools
   - musicbrainzngs
+  - fuzzywuzzy

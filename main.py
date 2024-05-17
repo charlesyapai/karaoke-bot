@@ -5,9 +5,13 @@ import os
 import pandas as pd
 import numpy as np
 from typing import Final # Import to give the constants a type
-from telegram import Update # type: ignore
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes # type: ignore
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup# type: ignore
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler # type: ignore
 from match_songs import match_song
+from fuzzywuzzy import process
+
+
+
 import functools # For logging commands
 
 # -----------
@@ -21,11 +25,20 @@ BOT_USERNAME = '@CodechellaBot'
 
 #%% Commands
 
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("I am a songlist compiler! Here's how you can interact with me:\n\n"
+        "/add [song_name] - Artist - Adds a song to the list. E.g., /add Bohemian Rhapsody - Queen \n"
+        "/delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., /delete Bohemian Rhapsody\n"
+        "/list - Displays all songs in the list with the requester's name.\n\n"
+        "/listall - Displays all the songs in the list."
+        "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("I am a songlist compiler. Here's how you can interact with me:\n\n"
-        "!add [song_name] - Adds a song to the list. E.g., !add Bohemian Rhapsody\n"
-        "!delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., !delete Bohemian Rhapsody\n"
-        "!list - Displays all songs in the list with the requester's name.\n\n"
+        "/add [song_name] - Artist - Adds a song to the list. E.g., /add Bohemian Rhapsody - Queen \n"
+        "/delete [song_name] - Deletes a song from the list if you added it or if you're an admin. E.g., /delete Bohemian Rhapsody\n"
+        "/list - Displays all songs in the list for the specific requester.\n\n"
+        "/listall - Displays all the songs in the list."
         "Please tell me which songs you want to add to the list, or if you'd like to see the list!")
 
 #%% Songlist handling
@@ -94,22 +107,71 @@ async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+# @log_command
+# async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+#     args = context.args
+#     if not args:
+#         await update.message.reply_text('Please specify a song to delete.')
+#         return
+#     song_name = ' '.join(args).strip()
+#     user = update.effective_user
+#     global songs_df
+#     if song_name not in songs_df['song_name'].values:
+#         await update.message.reply_text('This song is not on the list.')
+#     elif not songs_df[(songs_df['song_name'] == song_name) & (songs_df['user_id'] == user.id)].empty:
+#         songs_df = songs_df.drop(songs_df[(songs_df['song_name'] == song_name) & (songs_df['user_id'] == user.id)].index)
+#         await update.message.reply_text(f'Removed "{song_name}" from the list.')
+#     else:
+#         await update.message.reply_text('You do not have permission to delete this song.')
+
 @log_command
 async def delete_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
         await update.message.reply_text('Please specify a song to delete.')
         return
-    song_name = ' '.join(args).strip()
+
+    input_song = ' '.join(args).strip()
     user = update.effective_user
     global songs_df
-    if song_name not in songs_df['song_name'].values:
-        await update.message.reply_text('This song is not on the list.')
-    elif not songs_df[(songs_df['song_name'] == song_name) & (songs_df['user_id'] == user.id)].empty:
-        songs_df = songs_df.drop(songs_df[(songs_df['song_name'] == song_name) & (songs_df['user_id'] == user.id)].index)
-        await update.message.reply_text(f'Removed "{song_name}" from the list.')
-    else:
-        await update.message.reply_text('You do not have permission to delete this song.')
+
+    # Using fuzzy matching to find the closest song
+    choices = songs_df['matched_song_name'].tolist()
+    best_match, score = process.extractOne(input_song, choices)
+
+    if score < 75:  # Threshold for match quality
+        await update.message.reply_text("No matching song found. Please check your input and try again.")
+        return
+
+    # Prepare confirmation buttons
+    keyboard = [
+        [InlineKeyboardButton("Yes", callback_data=f'delete_yes_{best_match}'),
+         InlineKeyboardButton("No", callback_data='delete_no')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(
+        f'Are you sure you want to delete "{best_match}"?', 
+        reply_markup=reply_markup
+    )
+
+async def handle_delete_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data
+    if data.startswith('delete_yes_'):
+        song_to_delete = data.split('delete_yes_')[1]
+        global songs_df
+
+        # Remove all entries of the song regardless of the user who added them
+        if song_to_delete in songs_df['song_name'].values:
+            songs_df = songs_df[songs_df['song_name'] != song_to_delete]
+            await query.edit_message_text(f'Removed "{song_to_delete}" from the list.')
+        else:
+            await query.edit_message_text("No such song found in the list.")
+    elif data == 'delete_no':
+        await query.edit_message_text("Deletion cancelled.")
+
 
 
 
@@ -124,16 +186,21 @@ async def individual_list_command(update: Update, context: ContextTypes.DEFAULT_
     user_id_str = str(user.id)
     # Filter the DataFrame to get only the songs added by the requesting user
     user_songs_df = songs_df[songs_df['user_id'] == user_id_str]
+
     if user_songs_df.empty:
         await update.message.reply_text('You have not added any songs to the list.')
     else:
         num_songs = len(user_songs_df)
-        message = f"🎶 {user.full_name}, you've added {num_songs} song(s):\n"
+        message = f"Hi 🎶 {user.full_name}! You've added {num_songs} song(s):\n"
         message += "───────────────\n"  # Dotted line for separation
-        # Create a numbered list of songs
-        songs_list = '\n'.join(f"{idx + 1}. {song}" for idx, song in enumerate(user_songs_df['song_name']))
+        # Create a numbered list of songs using 'matched_song_name' or 'song_name' if the former is NA
+        songs_list = '\n'.join(
+            f"{idx + 1}. {row['matched_song_name'] if pd.notna(row['matched_song_name']) else row['song_name']}"
+            for idx, row in user_songs_df.iterrows()
+        )
         message += songs_list
         await update.message.reply_text(message)
+
 
 
 @log_command
@@ -141,16 +208,18 @@ async def list_songs_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if songs_df.empty:
         await update.message.reply_text('The song list is empty.')
         return
+
     message = ""
     for name, group in songs_df.groupby('user_full_name'):
         song_list = '\n'.join([
-            f"{row['song_name']}, by "
+            f"{row['matched_song_name'] if pd.notna(row['matched_song_name']) else row['song_name']} | "
             f"{row['artist'] if pd.notna(row['artist']) else ''} "
             f"{row['priority_number'] if pd.notna(row['priority_number']) else ''}"
             for _, row in group.iterrows()
         ])
         message += f"🎶 {name} 🎶:\n──────────────\n{song_list}\n\n"
     await update.message.reply_text(message)
+
 
 
 
@@ -279,6 +348,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 
+#%%
+
+
+
+
 #%% Logging errors
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error \n {context.error}')
@@ -296,6 +370,7 @@ if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
 
     # Commands
+    app.add_handler(CommandHandler('start', help_command))
     app.add_handler(CommandHandler('help', help_command)) 
 
     # Saving commands
@@ -306,6 +381,8 @@ if __name__ == '__main__':
     # Handling song commands
     app.add_handler(CommandHandler('add', add_song_command))
     app.add_handler(CommandHandler('delete', delete_song_command))
+    app.add_handler(CallbackQueryHandler(handle_delete_confirmation))
+
 
 
     # Listing songs
@@ -313,7 +390,7 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler('listall', list_songs_command))
 
     # Listing by singers and stats
-    app.add_handler(CommandHandler('listbysingers', list_by_singers_command))
+    app.add_handler(CommandHandler('listbysinger', list_by_singers_command))
     app.add_handler(CommandHandler('getstats', get_stats_command))
 
     # Messages

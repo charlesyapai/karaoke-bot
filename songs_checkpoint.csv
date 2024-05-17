@@ -1,53 +1,52 @@
 song_name,user_full_name,user_id,priority_number,matched_song_name,genre,artist
-Shape of You,Charles,127737245,,Shape of You,,Ed Sheeran
-Thinking Out Loud,Charles,127737245,,Thinking Out Loud,,Ed Sheeran
-Someone Like You,Charles,127737245,,Someone Like You,,Adele
-Rolling in the Deep,Charles,127737245,,Rolling in the Deep,,Adele
-Hall of Fame,Charles,127737245,,Hall of Fame,,The Script
-The Man Who Can't Be Moved,Charles,127737245,,The Man Who Can't Be Moved,,The Script
-Breakeven,Charles,127737245,,Breakeven,,The Script
-Bohemian Rhapsody,Charles,127737245,,Bohemian Rhapsody,,Queen
-I See Fire,Leroy Ee,1606865690,,I See Fire,,Ed Sheeran
-Defying Gravity,Leroy Ee,1606865690,,Defying Gravity,,Idina Menzel
-Fix you,Leroy Ee,1606865690,,Fix You,,Coldplay
-Tennessee Whiskey,Leroy Ee,1606865690,,Tennessee Whiskey,,Ed Sheeran
-light in the hallway,Leroy Ee,1606865690,,Light In The Hallway,,Pentatonix
-Castle on the Hill,Leroy Ee,1606865690,,Castle on the Hill,,Ed Sheeran
-Rewrite the Stars,Leroy Ee,1606865690,,Rewrite the Stars,,Anne-Marie
-Fuck you - Cee Lo Green,Rosamund Lim,171359144,,Fuck You,,Cee Lo Green
-海阔天空 - Beyond,Rosamund Lim,171359144,,海阔天空,,Beyond
-You're Beautiful,Dale park,5143797367,,You're Beautiful,,James Blunt
-Hips Don’t Lie - Shakira,Rosamund Lim,171359144,,Hips Don’t Lie,,Shakira
-Rehab,Dale park,5143797367,,Rehab,,Amy Winehouse
-Black Parade - My chemical Romance,Rosamund Lim,171359144,,,,
-没那么简单 - 黄小琥,Rosamund Lim,171359144,,,,
-My Love,Leroy Ee,1606865690,,,,
-Hit Me Baby One More Time,Rosamund Lim,171359144,,,,Britney Spears
-嫁后 - 黄小琥,Dale park,5143797367,,,,
-Don't Start Now,Leroy Ee,1606865690,,,,
-Where is the Love? - Black eyed Peas,Rosamund Lim,171359144,,,,
-My Humps,Rosamund Lim,171359144,,,,Black Eyed Peas
-Alive,Leroy Ee,1606865690,,,,
-Barbie Girl - Aqua,Rosamund Lim,171359144,,,,
-Just Give Me a Reason,Leroy Ee,1606865690,,,,
-When I was Your Man,Dale park,5143797367,,,,Bruno Mars
-Edge of Glory,Leroy Ee,1606865690,,,,
-Payphone,Leroy Ee,1606865690,,,,Maroon 5
-I Need your Love,Leroy Ee,1606865690,,,,
-Don’t Stop Me Now - Queen,Danny Lim,68808900,,,,Queen
-When you believe - Whitney Houston & Mariah Carey,Rosamund Lim,171359144,,,,
-Wet Ass Pussy,Rosamund Lim,171359144,,,,Megan Thee Stallion Cardi B
-Anaconda,Rosamund Lim,171359144,,,,Nicki Minaj
-Someone You loved,Dale park,5143797367,,Someoone You Loved,Unknown,Lewis Capaldi
-Come to your senses,Charles,127737245,,Come to Your Senses,Unknown,Alexandra Shipp
-Standing Next to You,Charles,127737245,,Standing Next to You,Unknown,Jung Kook
-Tequila,Damien Mak,303361924,,Tequila,Unknown,The Champs
-One Man One Woman,Leroy Ee,,,One Man One Woman,,Abba
-lmao,Charles,127737245,,LMAO,Unknown,Grand Analog
-You’re Still The One,Danny Lim,68808900,,You're Still the One,Unknown,Shania Twain
-For Good,Leroy Ee,1606865690,,For Good,Unknown,Ulrich Schnauss
-The Great Escape,Danny Lim,68808900,,The Great Escape,Unknown,Unknown artist
-Because of You,Danny Lim,68808900,,Because of You,Unknown,Ne‐Yo
-I Don't Wanna Miss A Thing,Danny Lim,68808900,,I Don't Want to Miss a Thing,Unknown,Aerosmith
-Show Must Go On,Danny Lim,68808900,,The Show Must Go On,Unknown,Queen
-Talking To The Moon,Danny Lim,68808900,,Talking to the Moon,Unknown,Bruno Mars
+Shape of You,Charles,127737245,,Shape of You,Ballad,Ed Sheeran
+Thinking Out Loud,Charles,127737245,,Thinking Out Loud,Ballad,Ed Sheeran
+Someone Like You,Charles,127737245,,Someone Like You,Ballad,Adele
+Rolling in the Deep,Charles,127737245,,Rolling in the Deep,Ballad,Adele
+Hall of Fame,Charles,127737245,,Hall of Fame,Pop,The Script
+The Man Who Can't Be Moved,Charles,127737245,,The Man Who Can't Be Moved,Pop,The Script
+Breakeven,Charles,127737245,,Breakeven,Ballad,The Script
+Bohemian Rhapsody,Charles,127737245,,Bohemian Rhapsody,Pop,Queen
+I See Fire,Leroy Ee,1606865690,,I See Fire,Pop,Ed Sheeran
+Defying Gravity,Leroy Ee,1606865690,,Defying Gravity,Ballad,Idina Menzel
+Fix you,Leroy Ee,1606865690,,Fix You,Ballad,Coldplay
+Tennessee Whiskey,Leroy Ee,1606865690,,Tennessee Whiskey,Pop,Ed Sheeran
+light in the hallway,Leroy Ee,1606865690,,Light In The Hallway,Pop,Pentatonix
+Castle on the Hill,Leroy Ee,1606865690,,Castle on the Hill,Pop,Ed Sheeran
+Rewrite the Stars,Leroy Ee,1606865690,,Rewrite the Stars,Pop,Anne-Marie
+Fuck you - Cee Lo Green,Rosamund Lim,171359144,,Fuck You,Pop,Cee Lo Green
+海阔天空 - Beyond,Rosamund Lim,171359144,,海阔天空,Pop,Beyond
+You're Beautiful,Dale park,5143797367,,You're Beautiful,Ballad,James Blunt
+Hips Don’t Lie - Shakira,Rosamund Lim,171359144,,Hips Don’t Lie,Pop,Shakira
+Rehab,Dale park,5143797367,,Rehab,Ballad,Amy Winehouse
+Black Parade - My chemical Romance,Rosamund Lim,171359144,,My Chemical Romance,Pop,Black Parade
+没那么简单 - 黄小琥,Rosamund Lim,171359144,,没那么简单,Ballad,黄小琥
+My Love,Leroy Ee,1606865690,,My Love,Ballad,WestLife
+Hit Me Baby One More Time,Rosamund Lim,171359144,,Hit Me Baby One More Time,Pop,Britney Spears
+嫁后 - 黄小琥,Dale park,5143797367,,嫁后,Ballad,黄小琥
+Don't Start Now,Leroy Ee,1606865690,,Don't Start Now,Pop,Dua Lipa
+Where is the Love? - Black eyed Peas,Rosamund Lim,171359144,,Where is the Love,Ballad,Black Eyed Peas
+My Humps,Rosamund Lim,171359144,,My Humps,Rap,Black Eyed Peas
+Alive,Leroy Ee,1606865690,,Alive,Pop,Sia
+Barbie Girl - Aqua,Rosamund Lim,171359144,,Barbie Girl,Pop,Aqua
+Just Give Me a Reason,Leroy Ee,1606865690,,Just Give Me a Reason,Ballad,Pink
+When I was Your Man,Dale park,5143797367,,When I Was Your Man,Ballad,Bruno Mars
+Edge of Glory,Leroy Ee,1606865690,,Edge of Glory,Pop,Pink
+Payphone,Leroy Ee,1606865690,,Payphone,Pop,Maroon 5
+I Need your Love,Leroy Ee,1606865690,,I Need Your Love,Pop,Calvin Harris
+Don’t Stop Me Now - Queen,Danny Lim,68808900,,Don't Stop Me Now,Pop,Queen
+When you believe - Whitney Houston & Mariah Carey,Rosamund Lim,171359144,,When You Believe,Ballad,Whitney Houston
+Wet Ass Pussy,Rosamund Lim,171359144,,Wet Ass Pussy,Rap,Megan Thee Stallion Cardi B
+Anaconda,Rosamund Lim,171359144,,Anaconda,Rap,Nicki Minaj
+Someone You loved,Dale park,5143797367,,Someoone You Loved,Ballad,Lewis Capaldi
+Come to your senses,Charles,127737245,,Come to Your Senses,Ballad,Alexandra Shipp
+Standing Next to You,Charles,127737245,,Standing Next to You,Pop,Jung Kook
+Tequila,Damien Mak,303361924,,Tequila,Pop,The Champs
+One Man One Woman,Leroy Ee,,,One Man One Woman,Pop,Abba
+You’re Still The One,Danny Lim,68808900,,You're Still the One,Pop,Shania Twain
+For Good,Leroy Ee,1606865690,,For Good,Pop,Ulrich Schnauss
+The Great Escape,Danny Lim,68808900,,The Great Escape,Pop,Unknown artist
+Because of You,Danny Lim,68808900,,Because of You,Pop,Ne‐Yo
+I Don't Wanna Miss A Thing,Danny Lim,68808900,,I Don't Want to Miss a Thing,Ballad,Aerosmith
+Show Must Go On,Danny Lim,68808900,,The Show Must Go On,Pop,Queen
+Talking To The Moon,Danny Lim,68808900,,Talking to the Moon,Ballad,Bruno Mars
