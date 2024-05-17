@@ -48,6 +48,8 @@ songs_df = pd.DataFrame(columns=[
     'priority_number', 'matched_song_name', 'genre', 'artist'
 ])
 
+song_queue = []
+
 # Initialize these columns with a default of NaN for now
 songs_df['priority_number'] = np.nan
 songs_df['matched_song_name'] = pd.NA
@@ -64,6 +66,106 @@ def log_command(func):
         print(f"Command: {command} by User: {user.full_name} ({user.id})")  # Logging the command and user info
         await func(update, context)
     return wrapper
+
+
+# Queuing Commands
+@log_command
+async def queue_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global song_queue
+
+    # Display the current songs in the queue
+    message = "Current Song Queue:\n" + "\n".join(f"{idx + 1}. {item['song_name']} (added by {item['user_full_name']})" for idx, item in enumerate(song_queue))
+    
+    # Append instructions for managing the queue
+    message += "\n\nTo add a song to the queue, press /addqueue,\nTo delete a song, press /delqueue"
+    await update.message.reply_text(message)
+
+# Deletion of Song from Queue
+@log_command
+async def delete_from_queue_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global song_queue
+    if not song_queue:
+        await update.message.reply_text("The song queue is currently empty.")
+        return
+
+    # Display the current songs in the queue with delete buttons
+    keyboard = [
+        [InlineKeyboardButton(f"{idx + 1}. {item['song_name']}", callback_data=f'delete_queue_{idx}')]
+        for idx, item in enumerate(song_queue)
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Click on a song to remove it from the queue:", reply_markup=reply_markup)
+
+async def handle_queue_deletion(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    # Parse the callback data to get the index
+    _, idx = query.data.split('_queue_')
+    idx = int(idx)  # Convert the index back to integer
+
+    if 0 <= idx < len(song_queue):
+        removed_song = song_queue.pop(idx)  # Remove the song by index
+        await query.edit_message_text(f'Removed "{removed_song['song_name']}" from the queue.')
+    else:
+        await query.edit_message_text("Failed to remove the song from the queue.")
+
+
+
+
+
+
+@log_command
+async def add_to_queue_command(update: Update, context: ContextTypes.DEFAULT_TYPE): 
+    user = update.effective_user
+    global songs_df
+    global song_queue
+    user_id_str = str(user.id)
+    print("Checking queue length...")  # Debug log
+    # Check if the queue is full
+    if len(song_queue) >= 10:
+        await update.message.reply_text("The song queue is full (10 songs max).")
+        return
+
+    print(f"Fetching songs added by user {user.id}...")  # Debug log
+    # Fetch songs added by the user
+    user_songs = songs_df[songs_df['user_id'].astype(str) == user_id_str]['song_name'].drop_duplicates().tolist()
+    print(f"User songs: {user_songs}")  # Debug log
+    if not user_songs:
+        await update.message.reply_text("You haven't added any songs to the list yet.")
+        return
+
+    # Generate buttons for each song the user has added
+    print("Generating buttons...")  # Debug log
+    keyboard = [
+        [InlineKeyboardButton(song, callback_data=f'queue_add_{song}')] for song in user_songs
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Select a song to add to the queue:", reply_markup=reply_markup)
+
+
+# Handler function
+async def handle_queue_addition(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    song_to_add = query.data.split('queue_add_')[1]
+    user = update.effective_user
+    global song_queue
+
+    # Prevent duplicates in the queue
+    if song_to_add in [item['song_name'] for item in song_queue]:
+        await query.edit_message_text(f'"{song_to_add}" is already in the queue.')
+        return
+
+    # Add the song to the queue if not full and not a duplicate
+    if len(song_queue) < 10:
+        song_queue.append({'song_name': song_to_add, 'user_full_name': user.full_name, 'user_id': user.id})
+        await query.edit_message_text(f'Added "{song_to_add}" to the queue. Press /addqueue to add another song, or /queue to go back to the queue.')
+    else:
+        await query.edit_message_text("The song queue is full (10 songs max).")
+
+
 
 @log_command
 async def add_song_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -368,6 +470,15 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     print('Starting bot...')
     app = ApplicationBuilder().token(TOKEN).build()
+
+
+
+    # Queuing commands:
+    app.add_handler(CommandHandler('addqueue', add_to_queue_command))
+    app.add_handler(CallbackQueryHandler(handle_queue_addition, pattern='^queue_add_'))
+    app.add_handler(CommandHandler('queue', queue_command))
+    app.add_handler(CommandHandler('delqueue', delete_from_queue_command))
+    app.add_handler(CallbackQueryHandler(handle_queue_deletion, pattern='^delete_queue_'))
 
     # Commands
     app.add_handler(CommandHandler('start', help_command))

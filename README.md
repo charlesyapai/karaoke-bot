@@ -34,6 +34,12 @@ To run the bot:
 It is important to point to the correct version of python being used to run the file for some reason. Ensure that you do not run this notebook in an interactive window as well. 
 
 
-# Setting up the bot with @BotFather
+## Setting up the bot with @BotFather
 
 Make sure to get the API key from BotFather, and also set the privacy of the bot off to enable messages from groups.
+
+
+
+## Hosting
+
+This bot can be hosted 
